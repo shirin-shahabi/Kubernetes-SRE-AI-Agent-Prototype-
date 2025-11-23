@@ -2,7 +2,7 @@
 Kubernetes interaction layer for the SRE AI Agent
 """
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from kubernetes import client, config as k8s_config
 from kubernetes.client.rest import ApiException
@@ -217,7 +217,7 @@ class KubernetesClient:
             
             deployment.spec.template.metadata.annotations[
                 "kubectl.kubernetes.io/restartedAt"
-            ] = datetime.utcnow().isoformat()
+            ] = datetime.now(timezone.utc).isoformat()
             
             # Patch the deployment
             self.apps_v1.patch_namespaced_deployment(
