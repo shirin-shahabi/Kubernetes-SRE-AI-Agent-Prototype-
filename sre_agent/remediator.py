@@ -2,7 +2,7 @@
 Remediation module for fixing Kubernetes issues
 """
 import logging
-from typing import Dict, Any, List, Callable
+from typing import Dict, Any, List
 from enum import Enum
 
 from .detector import Issue, FailureType

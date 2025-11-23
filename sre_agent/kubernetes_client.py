@@ -2,6 +2,7 @@
 Kubernetes interaction layer for the SRE AI Agent
 """
 import logging
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from kubernetes import client, config as k8s_config
 from kubernetes.client.rest import ApiException
@@ -204,8 +205,6 @@ class KubernetesClient:
             if dry_run:
                 logger.info(f"DRY RUN: Would restart deployment {deployment_name}")
                 return True
-            
-            from datetime import datetime
             
             # Get the deployment
             deployment = self.apps_v1.read_namespaced_deployment(
