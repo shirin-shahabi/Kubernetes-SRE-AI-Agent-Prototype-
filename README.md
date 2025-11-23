@@ -2,6 +2,8 @@
 
 An intelligent Site Reliability Engineering (SRE) agent that automatically detects, diagnoses, and remediates common Kubernetes failures using AI-powered analysis.
 
+> **📖 New to this project?** Check out the [Quick Start Guide](QUICKSTART.md) to get running in 10 minutes!
+
 ## 🎯 Overview
 
 This prototype demonstrates a complete pipeline from problem detection to resolution, with human-in-the-loop approval for safety. The agent handles two critical scenarios:

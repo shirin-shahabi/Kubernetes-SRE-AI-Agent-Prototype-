@@ -1,10 +1,9 @@
 """
 LangChain-based AI Agent for reasoning about Kubernetes issues.
 """
-from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import logging
 import os
 
@@ -130,7 +129,3 @@ Corrected Selector: {suggested_fix.get('suggested_selector', {})}
             formatted.append(f"  {key}: {value}")
         
         return "\n".join(formatted)
-
-
-# Fix import
-from typing import Optional
