@@ -1,0 +1,15 @@
+# AI Agent Framework
+langchain==0.1.0
+langchain-openai==0.0.2
+langchain-community==0.0.10
+
+# Kubernetes Client
+kubernetes==28.1.0
+
+# Web Framework for UI
+gradio==4.16.0
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.3
+pyyaml==6.0.1
