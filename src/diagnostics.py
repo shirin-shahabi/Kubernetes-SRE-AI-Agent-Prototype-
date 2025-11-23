@@ -184,7 +184,13 @@ class Diagnostics:
     
     @staticmethod
     def _generate_memory_patch(container_name: str, new_limit: str) -> Dict[str, Any]:
-        """Generate a patch for updating container memory limits."""
+        """
+        Generate a patch for updating container memory limits.
+        Sets requests to 70% of limits for better cluster utilization.
+        """
+        # Calculate request as 70% of limit for better scheduling
+        new_request = Diagnostics._calculate_memory_request(new_limit)
+        
         return {
             'spec': {
                 'template': {
@@ -197,7 +203,7 @@ class Diagnostics:
                                         'memory': new_limit
                                     },
                                     'requests': {
-                                        'memory': new_limit
+                                        'memory': new_request
                                     }
                                 }
                             }
@@ -206,3 +212,15 @@ class Diagnostics:
                 }
             }
         }
+    
+    @staticmethod
+    def _calculate_memory_request(limit: str) -> str:
+        """Calculate memory request as 70% of limit."""
+        import re
+        match = re.match(r'(\d+)([A-Za-z]+)', str(limit))
+        if match:
+            value = int(match.group(1))
+            unit = match.group(2)
+            request_value = int(value * 0.7)
+            return f"{request_value}{unit}"
+        return limit  # Fallback to same as limit if parsing fails

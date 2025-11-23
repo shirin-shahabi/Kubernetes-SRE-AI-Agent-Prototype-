@@ -124,23 +124,15 @@ def diagnose_broken_service(namespace: str, service: str):
         return f"❌ Error: {str(e)}", ""
 
 
-# Global state to store current diagnosis result
-current_diagnosis_result = {}
-
-
 def run_diagnosis(scenario: str, namespace: str, resource_name: str):
     """Run diagnosis based on selected scenario."""
-    global current_diagnosis_result
-    
     if scenario == "OOMKilled Pod":
         result = orchestrator.diagnose_oomkilled_scenario(namespace, resource_name)
     else:  # Broken Service
         result = orchestrator.diagnose_broken_service_scenario(namespace, resource_name)
     
-    current_diagnosis_result = result
-    
     if not result.get('success'):
-        return f"❌ Error: {result.get('error')}", "", gr.update(visible=False)
+        return f"❌ Error: {result.get('error')}", "", gr.update(visible=False), None
     
     diagnosis = result.get('diagnosis', {})
     
@@ -183,18 +175,16 @@ def run_diagnosis(scenario: str, namespace: str, resource_name: str):
     else:
         remediation_text = f"**Action:** {action}"
     
-    return diagnosis_text, remediation_text, gr.update(visible=True)
+    return diagnosis_text, remediation_text, gr.update(visible=True), result
 
 
-def execute_fix():
+def execute_fix(diagnosis_result):
     """Execute the approved remediation."""
-    global current_diagnosis_result
-    
-    if not current_diagnosis_result:
+    if not diagnosis_result:
         return "❌ No diagnosis result available. Please run diagnosis first."
     
     try:
-        execution_result = orchestrator.execute_remediation(current_diagnosis_result)
+        execution_result = orchestrator.execute_remediation(diagnosis_result)
         
         if execution_result.get('success'):
             return f"""
@@ -271,15 +261,19 @@ def create_ui():
         
         execution_output = gr.Markdown(label="Execution Results")
         
+        # State to store diagnosis result (thread-safe per-session)
+        diagnosis_state = gr.State(value=None)
+        
         # Event handlers
         diagnose_btn.click(
             fn=run_diagnosis,
             inputs=[scenario, namespace, resource_name],
-            outputs=[diagnosis_output, remediation_output, approval_row]
+            outputs=[diagnosis_output, remediation_output, approval_row, diagnosis_state]
         )
         
         approve_btn.click(
             fn=execute_fix,
+            inputs=[diagnosis_state],
             outputs=[execution_output]
         )
         
