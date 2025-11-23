@@ -365,7 +365,13 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to add new scenarios, submit pull requests, and contribute to the project.
+
+## 📚 Additional Documentation
+
+- [Quick Start Guide](QUICKSTART.md) - Get running in 10 minutes
+- [Design Document](DESIGN.md) - Architecture and design decisions
+- [Contributing Guide](CONTRIBUTING.md) - How to contribute
 
 ## 📧 Contact
 
