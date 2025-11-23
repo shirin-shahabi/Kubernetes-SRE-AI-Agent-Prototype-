@@ -126,6 +126,9 @@ def diagnose_broken_service(namespace: str, service: str):
 
 def run_diagnosis(scenario: str, namespace: str, resource_name: str):
     """Run diagnosis based on selected scenario."""
+    if not orchestrator:
+        return "❌ Error: Orchestrator not initialized. Check Kubernetes configuration.", "", gr.update(visible=False), None
+    
     if scenario == "OOMKilled Pod":
         result = orchestrator.diagnose_oomkilled_scenario(namespace, resource_name)
     else:  # Broken Service
@@ -180,6 +183,9 @@ def run_diagnosis(scenario: str, namespace: str, resource_name: str):
 
 def execute_fix(diagnosis_result):
     """Execute the approved remediation."""
+    if not orchestrator:
+        return "❌ Error: Orchestrator not initialized. Check Kubernetes configuration."
+    
     if not diagnosis_result:
         return "❌ No diagnosis result available. Please run diagnosis first."
     
