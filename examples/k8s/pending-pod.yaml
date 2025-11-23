@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: pending-test
+  name: pending-test
+spec:
+  containers:
+  - image: nginx:latest
+    name: nginx
+  nodeSelector:
+    non-existent-node: 'true'
