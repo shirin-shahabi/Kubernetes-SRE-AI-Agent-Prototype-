@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: imagepull-test
+  name: imagepull-test
+spec:
+  containers:
+  - image: non-existent-image:latest
+    name: non-existent

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: oom-test
+  name: oom-test
+spec:
+  containers:
+  - args:
+    - --vm
+    - '1'
+    - --vm-bytes
+    - 500M
+    command:
+    - stress
+    image: polinux/stress
+    name: memory-hog
+    resources:
+      limits:
+        memory: 100Mi
+      requests:
+        memory: 50Mi

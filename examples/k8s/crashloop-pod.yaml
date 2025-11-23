@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: crashloop-test
+  name: crashloop-test
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - exit 1
+    image: busybox
+    name: crasher
