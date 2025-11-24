@@ -11,6 +11,8 @@ jobs:
   lint:
     name: Code Quality & Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -49,6 +51,9 @@ jobs:
   security:
     name: Security Scanning
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     
     steps:
     - name: Checkout code
@@ -80,6 +85,8 @@ jobs:
   unit-tests:
     name: Unit Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11']
@@ -122,6 +129,8 @@ jobs:
   e2e-tests:
     name: E2E Tests with Kind
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -162,6 +171,8 @@ jobs:
     name: Build Validation
     runs-on: ubuntu-latest
     needs: [lint, unit-tests, security]
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
