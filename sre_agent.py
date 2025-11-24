@@ -86,7 +86,7 @@ class KubernetesSREAgent:
                 # Check for CrashLoopBackOff
                 if pod.status.container_statuses:
                     for container in pod.status.container_statuses:
-                        if container.state.waiting:
+                        if container.state and container.state.waiting:
                             if container.state.waiting.reason == "CrashLoopBackOff":
                                 failed_pods.append(
                                     {
@@ -158,11 +158,11 @@ class KubernetesSREAgent:
         try:
             deployment = self.apps_v1.read_namespaced_deployment(name=deployment_name, namespace=namespace)
 
-            replicas = deployment.spec.replicas
+            replicas = deployment.spec.replicas if deployment.spec.replicas is not None else 0
             ready_replicas = deployment.status.ready_replicas or 0
             available_replicas = deployment.status.available_replicas or 0
 
-            is_healthy = (ready_replicas == replicas) and (available_replicas == replicas)
+            is_healthy = (ready_replicas == replicas) and (available_replicas == replicas) and replicas > 0
 
             return {
                 "name": deployment_name,
