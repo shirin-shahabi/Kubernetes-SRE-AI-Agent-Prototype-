@@ -150,7 +150,7 @@ k8s-sre-agent ui
 1. **Check UI terminal logs** - Look for detailed error messages
 2. **Test CLI directly:**
    ```bash
-   export OPENROUTER_API_KEY="sk-or-v1-..."
+   export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
    k8s-sre-agent diagnose -t Deployment -r oom-test-app
    ```
 3. **Check kubectl works:**

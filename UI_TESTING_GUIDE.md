@@ -152,7 +152,7 @@ Running on local URL:  http://127.0.0.1:7860
 **Troubleshooting:**
 - If you see "OPENROUTER_API_KEY not set": 
   - Close the UI (Ctrl+C)
-  - Export the API key: `export OPENROUTER_API_KEY="sk-or-v1-..."`
+  - Export the API key: `export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"`
   - Restart: `k8s-sre-agent ui`
 
 ### 5.2 Provide Human Feedback
@@ -300,7 +300,7 @@ kind get clusters  # or: minikube status
 ## Complete Test Flow Summary
 
 ```
-1. Set API key        → export OPENROUTER_API_KEY="sk-or-v1-..."
+1. Set API key        → export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 2. Start Qdrant      → docker-compose up -d qdrant
 3. Deploy scenario    → kubectl apply -f tests/scenarios/...
 4. Start UI          → k8s-sre-agent ui (in terminal with API key!)
