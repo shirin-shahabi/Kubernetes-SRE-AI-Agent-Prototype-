@@ -2,6 +2,7 @@
 
 import json
 import os
+import threading
 from datetime import datetime
 
 import gradio as gr
@@ -13,6 +14,7 @@ logger = get_logger(__name__)
 
 pending_actions: dict[str, dict] = {}
 feedback_history: list[dict] = []
+_lock = threading.Lock()  # Thread safety for shared state
 
 
 def check_api_key():
@@ -39,15 +41,22 @@ def diagnose(namespace: str, resource_type: str, resource_name: str):
         return "**❌ Error:** Resource Name is required", "", "", ""
     
     try:
-        agent = SREAgent()
-        result = agent.run_until_approval(namespace, resource_type, resource_name)
+        # Run agent in a way that avoids async/dspy conflicts
+        def run_agent():
+            agent = SREAgent()
+            return agent.run_until_approval(namespace, resource_type, resource_name)
+        
+        # Run synchronously (Gradio handles threading)
+        result = run_agent()
         
         workflow_id = result.get("workflow_id", "")
         
         if not workflow_id:
             return "**❌ Error:** No workflow ID returned. Check logs for details.", "", "", ""
         
-        pending_actions[workflow_id] = result
+        # Thread-safe update
+        with _lock:
+            pending_actions[workflow_id] = result
         
         # Check if failure was detected
         if not result.get("detected"):
@@ -127,8 +136,10 @@ You pasted: `{workflow_id}`
 
 The Workflow ID is shown in the Diagnose tab after you click "Diagnose".""", get_feedback_log()
     
-    if workflow_id not in pending_actions:
-        return f"""❌ Workflow '{workflow_id[:20]}...' not found.
+    # Thread-safe check
+    with _lock:
+        if workflow_id not in pending_actions:
+            return f"""❌ Workflow '{workflow_id[:20]}...' not found.
 
 **Possible reasons:**
 1. You didn't run diagnosis first - Go to "Diagnose" tab and click "Diagnose"
@@ -138,36 +149,47 @@ The Workflow ID is shown in the Diagnose tab after you click "Diagnose".""", get
 **What a Workflow ID looks like:** `abc123-def456-7890-ghij-klmnopqrstuv`
 **What it's NOT:** `oom-test-app-7dcdbf9bfc-l48cx` (that's a pod name)""", get_feedback_log()
     
-    state = pending_actions[workflow_id]
+    with _lock:
+        state = pending_actions[workflow_id]
+    
     failure_type = state.get("failure_type", "Unknown")
     
     if not execute:
-        feedback_history.append({
-            "time": timestamp,
-            "workflow": workflow_id[:8],
-            "action": "approved_no_execute",
-            "failure": failure_type,
-            "feedback": feedback or "Approved but not executed",
-        })
+        with _lock:
+            feedback_history.append({
+                "time": timestamp,
+                "workflow": workflow_id[:8],
+                "action": "approved_no_execute",
+                "failure": failure_type,
+                "feedback": feedback or "Approved but not executed",
+            })
         return "✅ Action approved but NOT executed. Check 'Execute Fix' to apply changes.", get_feedback_log()
     
     try:
-        agent = SREAgent()
-        result = agent.resume_with_approval(pending_actions[workflow_id], approved=True)
+        # Run agent in a way that avoids async/dspy conflicts
+        def run_approve():
+            agent = SREAgent()
+            with _lock:
+                state = pending_actions[workflow_id]
+            return agent.resume_with_approval(state, approved=True)
+        
+        result = run_approve()
         
         eval_result = result.get("evaluation", {})
         success = eval_result.get("fixed", False)
         
-        feedback_history.append({
-            "time": timestamp,
-            "workflow": workflow_id[:8],
-            "action": "approved_and_executed",
-            "failure": failure_type,
-            "feedback": feedback or "No feedback provided",
-            "result": "success" if success else "partial",
-        })
-        
-        del pending_actions[workflow_id]
+        with _lock:
+            feedback_history.append({
+                "time": timestamp,
+                "workflow": workflow_id[:8],
+                "action": "approved_and_executed",
+                "failure": failure_type,
+                "feedback": feedback or "No feedback provided",
+                "result": "success" if success else "partial",
+            })
+            
+            if workflow_id in pending_actions:
+                del pending_actions[workflow_id]
         
         if success:
             msg = f"""✅ FIX APPLIED SUCCESSFULLY
@@ -187,15 +209,17 @@ Your feedback: {feedback or 'None'}"""
         return msg, get_feedback_log()
     
     except Exception as e:
-        feedback_history.append({
-            "time": timestamp,
-            "workflow": workflow_id[:8],
-            "action": "execution_failed",
-            "failure": failure_type,
-            "feedback": feedback or "None",
-            "error": str(e),
-        })
-        return f"❌ Execution failed: {e}", get_feedback_log()
+        logger.exception("execution_failed")
+        with _lock:
+            feedback_history.append({
+                "time": timestamp,
+                "workflow": workflow_id[:8],
+                "action": "execution_failed",
+                "failure": failure_type,
+                "feedback": feedback or "None",
+                "error": str(e)[:100],  # Truncate long errors
+            })
+        return f"❌ Execution failed: {str(e)[:200]}", get_feedback_log()
 
 
 def get_feedback_log():
