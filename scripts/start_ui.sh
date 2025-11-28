@@ -31,7 +31,7 @@ if [ -z "$OPENROUTER_API_KEY" ]; then
     echo -e "${RED}❌ OPENROUTER_API_KEY not set!${NC}"
     echo ""
     echo "Please set it:"
-    echo "  export OPENROUTER_API_KEY='your-api-key-here'"
+    echo "  export OPENROUTER_API_KEY='YOUR_API_KEY_HERE'"
     echo ""
     echo "Or add to your shell profile (~/.zshrc or ~/.bashrc):"
     echo "  export OPENROUTER_API_KEY='your-key-here'"

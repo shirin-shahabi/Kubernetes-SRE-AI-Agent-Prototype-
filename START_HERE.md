@@ -9,7 +9,7 @@ Your Qdrant is already running on port 6333. You can skip the `docker-compose up
 ### 1. Set API Key (REQUIRED!)
 
 ```bash
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 ```
 
 **Verify:** `echo $OPENROUTER_API_KEY`
@@ -31,7 +31,7 @@ kubectl get pods -l app=oom-test-app
 
 ```bash
 # Make sure API key is set in THIS terminal
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Start UI
 k8s-sre-agent ui

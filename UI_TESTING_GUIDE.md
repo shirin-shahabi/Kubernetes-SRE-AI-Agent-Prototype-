@@ -5,7 +5,7 @@ Complete guide to test the K8s SRE Agent UI with human feedback processing.
 ## ⚠️ IMPORTANT: Set API Key First!
 
 ```bash
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 ```
 
 **Verify it's set:**
@@ -18,7 +18,7 @@ echo $OPENROUTER_API_KEY
 ```bash
 cd ~/SREAgent/k8s-sre-agent
 source .venv/bin/activate
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Use the launcher script (checks everything)
 ./scripts/start_ui.sh
@@ -36,7 +36,7 @@ cd ~/SREAgent/k8s-sre-agent
 source .venv/bin/activate
 
 # 3. SET API KEY (REQUIRED!)
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # 4. Verify API key is set
 echo $OPENROUTER_API_KEY
@@ -102,7 +102,7 @@ cd ~/SREAgent/k8s-sre-agent
 source .venv/bin/activate
 
 # SET API KEY (MUST DO THIS!)
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Verify it's set
 echo $OPENROUTER_API_KEY
@@ -237,7 +237,7 @@ To test rejection (approve but don't execute):
 echo $OPENROUTER_API_KEY
 
 # If empty, set it:
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Verify
 echo $OPENROUTER_API_KEY
@@ -360,7 +360,7 @@ kind get clusters  # or: minikube status
 
 ```bash
 # Set API key (DO THIS FIRST!)
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Start everything
 docker-compose up -d qdrant

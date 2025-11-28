@@ -13,7 +13,7 @@ export OPENROUTER_API_KEY='your-key'
 **Solution:**
 ```bash
 # In the terminal where you run k8s-sre-agent ui
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Verify it's set
 echo $OPENROUTER_API_KEY
@@ -128,7 +128,7 @@ abc123-def456-7890-ghij-klmnopqrstuv
 
 ```bash
 # 1. Set API key
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # 2. Deploy test scenario
 kubectl apply -f tests/scenarios/oom_killed/memory_limit_low.yaml

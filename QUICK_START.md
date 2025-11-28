@@ -3,7 +3,7 @@
 ## ⚠️ CRITICAL: Set API Key First!
 
 ```bash
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 ```
 
 **Verify:** `echo $OPENROUTER_API_KEY` (should show your key, not empty)
@@ -13,7 +13,7 @@ export OPENROUTER_API_KEY="your-api-key-here"
 ```bash
 cd ~/SREAgent/k8s-sre-agent
 source .venv/bin/activate
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # This script checks everything and starts UI
 ./scripts/start_ui.sh
@@ -46,7 +46,7 @@ cd ~/SREAgent/k8s-sre-agent
 source .venv/bin/activate
 
 # ⚠️ SET API KEY IN THIS TERMINAL!
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 # Verify it's set
 echo $OPENROUTER_API_KEY

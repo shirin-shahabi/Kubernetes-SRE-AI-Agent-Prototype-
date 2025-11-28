@@ -66,7 +66,7 @@ kubectl describe pod -l app=oom-test-app | grep -A5 "Last State"
 # Terminal 2: Start UI
 cd ~/SREAgent/k8s-sre-agent
 source .venv/bin/activate
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 
 k8s-sre-agent ui
 ```
@@ -492,7 +492,7 @@ kubectl apply -f tests/scenarios/oom_killed/memory_limit_low.yaml
 sleep 10
 
 # Start UI
-export OPENROUTER_API_KEY="your-api-key-here"
+export OPENROUTER_API_KEY="YOUR_API_KEY_HERE"
 k8s-sre-agent ui
 
 # In browser: Diagnose → Get Workflow ID → Approve & Execute → Provide feedback
