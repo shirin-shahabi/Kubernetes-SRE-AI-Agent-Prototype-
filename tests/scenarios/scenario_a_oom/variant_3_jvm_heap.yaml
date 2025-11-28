@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oom-app-v3
+  namespace: default
+  labels:
+    app: oom-app
+    variant: jvm-heap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oom-app
+      variant: jvm-heap
+  template:
+    metadata:
+      labels:
+        app: oom-app
+        variant: jvm-heap
+    spec:
+      containers:
+      - name: jvm-app
+        image: polinux/stress:latest
+        command: ["stress"]
+        args: 
+          - "--vm"
+          - "1"
+          - "--vm-bytes"
+          - "180M"  # Will exceed 200Mi limit
+          - "--vm-hang"
+          - "1"
+        env:
+        - name: MEMORY_LIMIT
+          value: "200Mi"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "200Mi"  # Container limit - stress will exceed this
+            cpu: "200m"
+

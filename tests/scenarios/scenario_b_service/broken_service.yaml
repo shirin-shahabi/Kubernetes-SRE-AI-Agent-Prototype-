@@ -1,0 +1,51 @@
+---
+# Deployment with healthy pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthy-app
+  namespace: default
+  labels:
+    app: healthy-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: healthy-app
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: healthy-app
+        tier: backend
+        version: v1
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+# Service with label mismatch - won't match pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: broken-service
+  namespace: default
+spec:
+  selector:
+    app: healthy-app
+    tier: frontend  # MISMATCH: pods have tier=backend, service looks for tier=frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: ClusterIP
+

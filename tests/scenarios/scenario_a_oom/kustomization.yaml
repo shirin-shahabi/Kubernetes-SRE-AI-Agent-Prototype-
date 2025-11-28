@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - variant_1_memory_limit_low.yaml
+  - variant_2_memory_leak.yaml
+  - variant_3_jvm_heap.yaml
+
