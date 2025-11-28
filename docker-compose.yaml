@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: k8s-sre-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  agent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: k8s-sre-agent-api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    volumes:
+      - ~/.kube:/root/.kube:ro
+      - ./logs:/app/logs
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+  agent-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: k8s-sre-agent-ui
+    command: ["python", "-m", "k8s_sre_agent.ui.app"]
+    ports:
+      - "7860:7860"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    volumes:
+      - ~/.kube:/root/.kube:ro
+      - ./logs:/app/logs
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
+

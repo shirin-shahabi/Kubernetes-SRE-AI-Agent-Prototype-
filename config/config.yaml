@@ -1,0 +1,58 @@
+# Kubernetes SRE Agent Configuration
+# Reference: https://arxiv.org/pdf/2509.02449 (KubeIntellect)
+
+llm:
+  provider: openrouter
+  model: openai/gpt-4o-mini  # GPT-4o via OpenRouter (cost-effective)
+  base_url: https://openrouter.ai/api/v1
+  api_key: null  # Set via OPENROUTER_API_KEY env var
+  temperature: 0.1
+  max_tokens: 4096
+  timeout: 120
+
+qdrant:
+  host: localhost
+  port: 6333
+  collection: k8s_failure_patterns
+  embedding_model: BAAI/bge-small-en-v1.5
+  embedding_dim: 384
+
+kubernetes:
+  default_namespace: default
+  kubeconfig_path: null  # Uses default ~/.kube/config if null
+  context: null  # Uses current context if null
+
+reasoning:
+  mode: react  # react | sop | rl_dynamic
+  max_iterations: 5
+  confidence_threshold: 0.7
+
+safety:
+  dry_run_first: true
+  require_approval: true
+  max_retries: 3
+  dangerous_commands:
+    - "kubectl delete"
+    - "kubectl drain"
+    - "kubectl cordon"
+
+cache:
+  enabled: true
+  directory: .cache
+  diagnosis_ttl: 3600  # 1 hour
+  llm_response_ttl: 7200  # 2 hours
+
+logging:
+  level: INFO
+  format: json
+  file: logs/k8s_sre_agent.log
+
+api:
+  host: 0.0.0.0
+  port: 8000
+
+ui:
+  host: 0.0.0.0
+  port: 7860
+  share: false
+
