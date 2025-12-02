@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oom-app-v1
+  namespace: default
+  labels:
+    app: oom-app
+    variant: memory-limit-low
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oom-app
+      variant: memory-limit-low
+  template:
+    metadata:
+      labels:
+        app: oom-app
+        variant: memory-limit-low
+    spec:
+      containers:
+      - name: memory-hog
+        image: polinux/stress:latest
+        command: ["stress"]
+        args: ["--vm", "1", "--vm-bytes", "100M", "--vm-hang", "1"]
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "64Mi"  # Too low - will cause OOMKilled
+            cpu: "200m"
+

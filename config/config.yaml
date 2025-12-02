@@ -1,4 +1,11 @@
 # Kubernetes SRE Agent Configuration
+
+llm:
+  provider: openrouter  # openrouter | openai | anthropic
+  model: meta-llama/llama-3.1-8b-instruct:free  # Free model via OpenRouter
+  base_url: https://openrouter.ai/api/v1
+  api_key: null  # Set via OPENROUTER_API_KEY env var
+  temperature: 0.1
 # Reference: https://arxiv.org/pdf/2509.02449 (KubeIntellect)
 
 llm:
@@ -13,6 +20,28 @@ llm:
 qdrant:
   host: localhost
   port: 6333
+  collection: failure_patterns
+  embedding_model: nomic-embed-text
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  queue: sre_agent_tasks
+
+kubernetes:
+  default_namespace: default
+  kubeconfig_path: null  # Uses default if null
+
+logging:
+  level: INFO
+  format: json
+  file: logs/sre_agent.log
+
+monitoring:
+  enabled: true
+  prometheus_port: 9090
   collection: k8s_failure_patterns
   embedding_model: BAAI/bge-small-en-v1.5
   embedding_dim: 384

@@ -26,6 +26,165 @@ User -> CLI/API/UI -> SREAgent -> LangGraph Workflow
 
 ### Prerequisites
 
+KUBERNETES RESOURCE STATUS
+
+📊 Deployment: oom-app-v1
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+oom-app-v1   0/1     1            0           5m
+
+📊 Pods:
+NAME                      READY   STATUS             RESTARTS   AGE
+oom-app-v1-xxx-yyy        0/1     CrashLoopBackOff   3          5m
+
+AI AGENT DIAGNOSIS
+
+🔴 Failure Detected: OOMKilled
+
+📋 Root Cause Analysis:
+   Pod is being OOMKilled due to insufficient memory limits.
+   Current limits: 64Mi. The container is exceeding these
+   limits and being terminated by Kubernetes.
+
+📝 Contributing Factors:
+   • Memory limit too low: 64Mi
+   • Container memory usage exceeds configured limit
+   • Kubernetes OOMKiller is terminating the pod
+
+📊 Confidence: 90%
+
+PROPOSED FIX
+
+🔧 kubectl Command:
+   kubectl patch deployment oom-app-v1 -n default --type='json'
+   -p='[{"op": "replace", "path":
+   "/spec/template/spec/containers/0/resources/limits/memory",
+   "value": "512Mi"}]'
+
+💡 To execute manually:
+   kubectl patch deployment oom-app-v1 -n default --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/memory", "value": "512Mi"}]'
+
+⚠️  Risk Level: MEDIUM
+
+↩️  Rollback Plan:
+   kubectl rollout undo deployment/oom-app-v1 -n default
+
+✅ Expected Outcome:
+   Pod should have sufficient memory and stop being OOMKilled
+
+EXECUTE FIX
+
+   ./scripts/run_agent.sh execute --namespace default --deployment oom-app-v1
+```
+
+### Scenario B: Broken Service
+
+**Input:**
+```bash
+./scripts/run_agent.sh diagnose --namespace default --service broken-service
+```
+
+**Output:**
+```
+KUBERNETES RESOURCE STATUS
+
+📊 Service: broken-service
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+broken-service   ClusterIP   10.96.170.139   <none>        80/TCP    10m
+
+📊 Endpoints:
+NAME             ENDPOINTS   AGE
+broken-service   <none>      10m
+
+AI AGENT DIAGNOSIS
+
+🔴 Failure Detected: ServiceMisconfigured
+
+📋 Root Cause Analysis:
+   Service has no endpoints due to label mismatch. Service
+   selector: {"app":"healthy-app","tier":"frontend"}.
+   Available pod labels show tier=backend, causing mismatch.
+
+📝 Contributing Factors:
+   • Service selector: {"app":"healthy-app","tier":"frontend"}
+   • Available pods: 2 (with tier=backend)
+   • Label mismatch prevents service from finding pods
+
+📊 Confidence: 95%
+
+PROPOSED FIX
+
+🔧 kubectl Command:
+   kubectl patch service broken-service -n default --type='json'
+   -p='[{"op": "replace", "path": "/spec/selector", "value":
+   {"app":"healthy-app","tier":"backend"}}]'
+
+⚠️  Risk Level: LOW
+
+✅ Expected Outcome:
+   Service should now have endpoints and route traffic to pods
+```
+
+## Security
+
+This project follows security best practices. See **[SECURITY.md](SECURITY.md)** for detailed security guidelines.
+
+**Key Security Features:**
+- **Access Control**: RBAC for Kubernetes operations
+- **Audit Logging**: All actions logged with timestamps
+- **Dry-run Validation**: Commands validated before execution
+- **Human Approval**: Required for all remediation actions
+- **Timeout Protection**: Commands timeout after 30s
+- **Error Handling**: Graceful failure without exposing sensitive data
+- **API Key Management**: Environment variables, never committed
+
+## Future Work
+
+### Short-term Improvements
+- [ ] **More Failure Scenarios**: ImagePullBackOff, CrashLoopBackOff, PodDisruptionBudget violations
+- [ ] **Enhanced kubectl Integration**: Better error parsing and status reporting
+- [ ] **Qdrant Knowledge Base**: Vector embeddings for similarity search
+- [ ] **Prometheus Metrics**: Integration for monitoring agent performance
+- [ ] **Better Error Messages**: Include kubectl output in error messages
+- [ ] **Multi-cluster Support**: Handle multiple Kubernetes clusters
+
+### Long-term Enhancements
+- [ ] **RLHF Integration**: Learn from human feedback to improve diagnosis
+- [ ] **CI/CD Integration**: Automated testing and deployment pipelines
+- [ ] **Helm Charts**: Production-ready deployment manifests
+- [ ] **Grafana Dashboards**: Visual monitoring of agent operations
+- [ ] **Kubernetes MCP Server**: Native integration with MCP protocol
+- [ ] **Custom Failure Patterns**: User-defined failure detection rules
+- [ ] **Multi-tenant Support**: Namespace isolation and RBAC
+
+### Scalability & Cost Efficiency
+- [ ] **Horizontal Scaling**: Agent workers scale independently
+- [ ] **LLM Cost Optimization**: Batch requests, smarter caching
+- [ ] **Large Cluster Support**: Efficient processing for 1000+ pods
+- [ ] **Batch Processing**: Diagnose multiple resources in parallel
+
+### Research & Development
+- [ ] **Advanced RCA**: Multi-factor root cause analysis
+- [ ] **Predictive Failure Detection**: ML models for failure prediction
+- [ ] **Auto-remediation**: Low-risk automatic fixes with approval workflow
+- [ ] **Knowledge Graph**: Build failure pattern relationships
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## License
+
+See [LICENSE](LICENSE) file.
+
+## Acknowledgments
+
+- Built with [LangGraph](https://github.com/langchain-ai/langgraph)
+- Uses [DSPy](https://github.com/stanfordnlp/dspy) for structured LLM outputs
+- Kubernetes client via [kubernetes-python](https://github.com/kubernetes-client/python)
 - Python 3.11+
 - Kubernetes cluster (kind/minikube/etc.)
 - OpenRouter API key
