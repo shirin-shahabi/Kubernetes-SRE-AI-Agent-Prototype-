@@ -21,12 +21,27 @@ def test_config():
             "model": "meta-llama/llama-3.1-8b-instruct:free",
             "base_url": "https://openrouter.ai/api/v1",
             "api_key": os.getenv("OPENROUTER_API_KEY", "test-key"),
+"""Pytest configuration."""
+
+import pytest
+
+
+@pytest.fixture
+def mock_config():
+    """Mock configuration for tests."""
+    return {
+        "llm": {
+            "provider": "openrouter",
+            "model": "openai/gpt-4o-mini",
+            "base_url": "https://openrouter.ai/api/v1",
             "temperature": 0.1,
         },
         "qdrant": {
             "host": "localhost",
             "port": 6333,
             "collection": "test_failure_patterns",
+            "collection": "test_patterns",
+            "embedding_dim": 384,
         },
         "safety": {
             "dry_run_first": True,
@@ -55,4 +70,10 @@ def mock_k8s_client():
 def scenarios_dir():
     """Path to scenarios directory."""
     return Path(__file__).parent / "scenarios"
+
+        "cache": {
+            "directory": ".cache/test",
+            "diagnosis_ttl": 60,
+        },
+    }
 

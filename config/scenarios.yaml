@@ -1,0 +1,87 @@
+# Test Scenario Definitions for K8s SRE Agent
+# These scenarios are used for testing and demonstration
+
+scenarios:
+  # Scenario A: OOMKilled Pod
+  oom_killed:
+    name: "OOMKilled Pod"
+    description: "Deployment has pods repeatedly killed with OOMKilled status"
+    variants:
+      - id: memory_limit_low
+        name: "Memory Limit Too Low"
+        description: "Container memory limit set below application requirements"
+        manifest: tests/scenarios/oom_killed/memory_limit_low.yaml
+        expected_diagnosis: "Memory limit insufficient for workload"
+        expected_fix: "Increase memory limit"
+        
+      - id: memory_leak
+        name: "Memory Leak"
+        description: "Application has memory leak causing gradual OOM"
+        manifest: tests/scenarios/oom_killed/memory_leak.yaml
+        expected_diagnosis: "Application memory leak detected"
+        expected_fix: "Investigate application code or add restart policy"
+        
+      - id: jvm_heap
+        name: "JVM Heap Misconfiguration"
+        description: "JVM heap settings exceed container limits"
+        manifest: tests/scenarios/oom_killed/jvm_heap.yaml
+        expected_diagnosis: "JVM heap exceeds container memory limit"
+        expected_fix: "Align JVM heap with container limits"
+
+  # Scenario B: Broken Service
+  broken_service:
+    name: "Broken Service"
+    description: "Service not routing traffic due to configuration issues"
+    variants:
+      - id: label_mismatch
+        name: "Label Mismatch"
+        description: "Service selector does not match pod labels"
+        manifest: tests/scenarios/broken_service/label_mismatch.yaml
+        expected_diagnosis: "Service selector does not match any pods"
+        expected_fix: "Update service selector or pod labels"
+        
+      - id: port_mismatch
+        name: "Port Mismatch"
+        description: "Service targetPort does not match container port"
+        manifest: tests/scenarios/broken_service/port_mismatch.yaml
+        expected_diagnosis: "Service targetPort does not match container port"
+        expected_fix: "Align service targetPort with container port"
+
+# Runbook patterns for knowledge base seeding
+runbooks:
+  oom_killed:
+    symptoms:
+      - "Pod status shows OOMKilled"
+      - "Container restarts with reason OOMKilled"
+      - "Events show 'OOMKilled' termination"
+    diagnostic_steps:
+      - "Check container memory limits: kubectl describe pod"
+      - "Review pod events for OOM details"
+      - "Check application memory usage patterns"
+      - "Compare requested vs actual memory consumption"
+    remediation:
+      - action: "Increase memory limit"
+        risk: low
+        command: "kubectl patch deployment {name} -n {namespace} --type=json -p='[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/resources/limits/memory\", \"value\": \"{new_limit}\"}]'"
+      - action: "Add memory request"
+        risk: low
+        command: "kubectl set resources deployment {name} -n {namespace} --requests=memory={request}"
+
+  broken_service:
+    symptoms:
+      - "Service has no endpoints"
+      - "Traffic not reaching pods"
+      - "curl/wget to service times out"
+    diagnostic_steps:
+      - "Check service selector: kubectl get svc -o yaml"
+      - "Check pod labels: kubectl get pods --show-labels"
+      - "Check endpoints: kubectl get endpoints"
+      - "Compare service selector with pod labels"
+    remediation:
+      - action: "Update pod labels to match service selector"
+        risk: low
+        command: "kubectl label pods -l {old_label} {new_label} --overwrite"
+      - action: "Update service selector to match pod labels"
+        risk: medium
+        command: "kubectl patch svc {name} -n {namespace} -p '{\"spec\":{\"selector\":{new_selector}}}'"
+

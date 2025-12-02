@@ -1,0 +1,29 @@
+# Scenario A: OOMKilled Pod - Memory Limit Too Low
+# Deploy: kubectl apply -f tests/scenarios/oom_killed/memory_limit_low.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oom-test-app
+  labels:
+    app: oom-test-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oom-test-app
+  template:
+    metadata:
+      labels:
+        app: oom-test-app
+    spec:
+      containers:
+      - name: stress
+        image: polinux/stress
+        command: ["stress"]
+        args: ["--vm", "1", "--vm-bytes", "150M", "--vm-hang", "1"]
+        resources:
+          limits:
+            memory: "64Mi"
+          requests:
+            memory: "64Mi"
+

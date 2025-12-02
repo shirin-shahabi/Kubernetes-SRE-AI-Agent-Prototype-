@@ -23,42 +23,61 @@ wheels/
 # Virtual environments
 .venv/
 venv/
-ENV/
+.env/
 env/
-.ENV/
+ENV/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
-
-# Project specific
-.cache/
-logs/
-*.log
-.env
-.env.local
-
-# Kubernetes
-kubeconfig
-*.kubeconfig
-
-# OS
 .DS_Store
-Thumbs.db
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
+.nox/
 
-# Jupyter
-.ipynb_checkpoints/
-
-# mypy
+# Type checking
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+*.cache
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# API Keys and Secrets (DO NOT COMMIT)
+*api*key*
+*secret*
+*password*
+*token*
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# uv
+uv.lock
+
+# Qdrant data
+qdrant_storage/
+
+# Temporary files
+*.tmp
+*.bak
+*~
+

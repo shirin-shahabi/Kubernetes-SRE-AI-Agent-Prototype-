@@ -1,56 +1,48 @@
 # Security Policy
 
-## Supported Versions
+## Overview
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+Security is a core design principle of the K8s SRE Agent. Since this agent has the potential to modify Kubernetes clusters, we implement a defense-in-depth strategy to ensure safety, integrity, and access control.
 
-## Security Considerations
+## Security Architecture
 
-### Kubernetes Access
+### 1. Authentication & Access Control
+- **API Key Authentication**: All API endpoints (except health checks) require a Bearer Token.
+  - Development: Keys can be generated via `/api-key` (disable in prod).
+  - Production: Set `API_SECRET_KEY` env var.
+- **RBAC (Future Work)**: We plan to implement Role-Based Access Control to restrict who can approve fixes.
 
-- The agent requires read access to Kubernetes resources
-- Write access (patch/apply) should be restricted to specific namespaces
-- Use RBAC to limit agent permissions
-- Never run with cluster-admin privileges
+### 2. Human-in-the-Loop Safety Gate
+- **No Autonomous Execution**: The agent **never** executes write operations without explicit human approval.
+- **Workflow State**: Proposed plans are stored in a pending state until a human reviews and approves them via the UI or API.
+- **Feedback Loop**: Human feedback is logged for audit and learning purposes.
 
-### API Keys
+### 3. Execution Safety
+- **Dry-Run Validation**: All `kubectl` commands are validated with `--dry-run=client` before execution to catch syntax or permission errors safely.
+- **Dangerous Command Blocking**: A blocklist prevents execution of destructive commands (e.g., `delete namespace`, `drain node`, `delete all`).
+- **Rollback Mechanism**: Every proposed fix is accompanied by a rollback command.
 
-- **Ollama**: No API keys required (local model)
-- **OpenAI** (if used): Store API keys in environment variables or secret management
-- Never commit API keys to version control
+### 4. Network Security
+- **Rate Limiting**: API implements in-memory rate limiting (100 requests/minute) to prevent abuse.
+- **CORS Policy**: Restricted to localhost UI and specific trusted origins.
+- **Sandboxing (Future Work)**: The agent should run in a restricted pod with limited egress and a tightly scoped ServiceAccount.
 
-### Network Security
+## Threat Model
 
-- Qdrant and RabbitMQ should be on private networks in production
-- Use TLS for RabbitMQ connections
-- Restrict API endpoints with authentication
+| Threat | Mitigation |
+|--------|------------|
+| **Unauthorized Access** | API Key Auth, future RBAC |
+| **Destructive Actions** | Human Approval, Command Blocklist, Dry-Runs |
+| **Prompt Injection** | Typed DSPy signatures, Input Validation |
+| **DoS Attacks** | Rate Limiting, Timeouts |
 
-### Sandbox Execution
+## Development Guidelines
 
-- All kubectl commands are validated before execution
-- Dry-run is enforced by default
-- Commands timeout after 30 seconds
-- Only kubectl commands are allowed
+- **Secrets**: Never commit secrets. Use environment variables.
+- **Dependencies**: Regularly scan dependencies for vulnerabilities.
+- **Audit Logs**: Ensure all agent actions and human approvals are logged.
 
-### Logging
+## Reporting Vulnerabilities
 
-- No sensitive data (API keys, tokens) in logs
-- Logs are stored locally by default
-- In production, use secure log aggregation
-
-### Recommendations
-
-1. **Deploy in isolated namespace** with limited RBAC
-2. **Use NetworkPolicies** to restrict pod communication
-3. **Enable audit logging** for all Kubernetes API calls
-4. **Regular security updates** for dependencies
-5. **Monitor for suspicious activity** in logs
-
-## Reporting a Vulnerability
-
-Please report security vulnerabilities to: [security@example.com]
-
-Do not open public issues for security vulnerabilities.
+Please report security issues to the maintainers directly. Do not open public issues for sensitive vulnerabilities.
 
